@@ -16,7 +16,6 @@
       --primary-hover: #009739;
       --primary-light: #eaf6ee;
       --accent: #f39200;
-      --accent-gold: #ffcc00;
       --text-main: #1e293b;
       --text-muted: #64748b;
       --surface: #ffffff;
@@ -38,14 +37,17 @@
       margin: 0;
       padding: 0;
       width: 100%;
-      overflow-x: hidden; /* Elimina barra de rolagem horizontal */
+      height: auto !important;
+      min-height: 0 !important;
+      overflow-x: hidden !important;
+      overflow-y: hidden !important; /* Sem scrollbar interna no iframe */
     }
 
     .cb-wrapper {
       width: 100%;
       max-width: 100%;
       margin: 0;
-      padding: 2px 2px 16px;
+      padding: 2px 2px 10px;
       background: transparent !important;
     }
 
@@ -355,9 +357,9 @@
 </head>
 <body>
 
-<div class="cb-wrapper">
+<div class="cb-wrapper" id="pageWrapper">
 
-  <!-- Header Card (Sem link externo no topo) -->
+  <!-- Header Card -->
   <div class="cb-hero">
     <div class="cb-badge">Classificação Contábil Oficial &bull; TCE-RS 75101</div>
     <h1>Despesas por Natureza da Despesa</h1>
@@ -501,6 +503,40 @@
   };
 
   let dadosBrutos = [];
+  let lastSentHeight = 0;
+  let resizeTimer = null;
+
+  // COMUNICAÇÃO DE ALTURA DINÂMICA COM O PLONE (EVITA CORTAR O IFRAME)
+  function notifyHeight() {
+    if (window.self === window.top) return;
+
+    if (resizeTimer) clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      const wrapper = document.getElementById('pageWrapper') || document.body;
+      const rect = wrapper.getBoundingClientRect();
+      const scrollH = document.documentElement.scrollHeight || document.body.scrollHeight;
+      const exactHeight = Math.ceil(Math.max(rect.height, scrollH)) + 24;
+
+      if (Math.abs(lastSentHeight - exactHeight) >= 2) {
+        lastSentHeight = exactHeight;
+        window.parent.postMessage({
+          type: 'sapl-resize',
+          frameId: 'despesas-natureza',
+          height: exactHeight,
+          frameHeight: exactHeight,
+          frame_height: exactHeight,
+          newHeight: exactHeight
+        }, '*');
+      }
+    }, 60);
+  }
+
+  // Monitora alterações de tamanho da janela ou do DOM
+  if (window.ResizeObserver) {
+    const ro = new ResizeObserver(() => notifyHeight());
+    ro.observe(document.body);
+  }
+  window.addEventListener('resize', notifyHeight);
 
   function formatarMoeda(val) {
     return Number(val || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -513,6 +549,7 @@
 
     loading.style.display = 'block';
     content.style.display = 'none';
+    notifyHeight();
 
     try {
       const response = await fetch(`${WORKER_BASE_URL}/despesas?ano=${ano}`);
@@ -526,6 +563,9 @@
     } finally {
       loading.style.display = 'none';
       content.style.display = 'block';
+      notifyHeight();
+      setTimeout(notifyHeight, 200);
+      setTimeout(notifyHeight, 600);
     }
   }
 
@@ -574,6 +614,7 @@
       document.getElementById('totalEmpenhado').innerText = formatarMoeda(0);
       document.getElementById('totalLiquidado').innerText = formatarMoeda(0);
       document.getElementById('totalPago').innerText = formatarMoeda(0);
+      notifyHeight();
       return;
     }
 
@@ -662,6 +703,10 @@
     document.getElementById('totalEmpenhado').innerText = formatarMoeda(totEmp);
     document.getElementById('totalLiquidado').innerText = formatarMoeda(totLiq);
     document.getElementById('totalPago').innerText = formatarMoeda(totPag);
+
+    notifyHeight();
+    setTimeout(notifyHeight, 200);
+    setTimeout(notifyHeight, 500);
   }
 
   function exportarCSV() {
