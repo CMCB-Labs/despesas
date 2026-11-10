@@ -1,56 +1,35 @@
 # Execução Orçamentária e Despesas - CMCB
 
-Painel interativo de consulta e transparência da **Execução Orçamentária e Despesas por Natureza** da Câmara Municipal de Coronel Barros/RS. Os dados são sincronizados diretamente com a base de dados abertos do Tribunal de Contas do Estado do Rio Grande do Sul (TCE-RS - Órgão `75101`).
+Painel interativo de consulta e transparência das **Despesas por Natureza** e **Movimentações Diárias da Execução Orçamentária** da Câmara Municipal de Coronel Barros/RS. Os dados são sincronizados diretamente com a base de dados abertos do Tribunal de Contas do Estado do Rio Grande do Sul (TCE-RS - Órgão `75101`).
 
 ---
 
-## 🌐 Acesso Direto
-- **URL do Painel:** [https://cmcb-labs.github.io/despesas/](https://cmcb-labs.github.io/despesas/)
+## 🌐 Páginas Dedicadas (Acesso Direto)
 
----
-
-## 💻 Código para Incorporação (Embed / Iframe)
-
-### 1. Para o Card: "Despesas por Natureza da Despesa"
-```html
-<iframe 
-  src="https://cmcb-labs.github.io/despesas/?view=natureza&embed=1&hide_header=1" 
-  width="100%" 
-  height="820" 
-  frameborder="0" 
-  style="border: none; width: 100%; min-height: 700px; display: block;">
-</iframe>
-```
-
-### 2. Para o Card: "Movimentações Diárias / Execução Orçamentária"
-```html
-<iframe 
-  src="https://cmcb-labs.github.io/despesas/?view=movimentacoes&embed=1&hide_header=1" 
-  width="100%" 
-  height="820" 
-  frameborder="0" 
-  style="border: none; width: 100%; min-height: 700px; display: block;">
-</iframe>
-```
-
-### 3. Para página institucional própria (com cabeçalho completo)
-```html
-<iframe 
-  src="https://cmcb-labs.github.io/despesas/?embed=1" 
-  width="100%" 
-  height="900" 
-  frameborder="0" 
-  style="border: none; width: 100%; min-height: 750px; display: block;">
-</iframe>
-```
-
----
-
-## ⚙️ Parâmetros Suportados na URL
-
-| Parâmetro | Valores Aceitos | Descrição |
+| Página | Finalidade | URL Oficial no GitHub Pages |
 | :--- | :--- | :--- |
-| `embed` | `1` | Ativa o modo embutido com fundo transparente e ajuste para iframes. |
-| `hide_header` | `1` | Oculta o cabeçalho superior (ideal quando inserido dentro do Plone). |
-| `view` | `natureza`, `movimentacoes` | Seleciona a aba inicial exibida na interface. |
-| `ano` | `2026`, `2025`, `2024`, `2023`, `2022` | Define o exercício orçamentário carregado por padrão. |
+| **Card 1: Movimentações Diárias** | Acompanhamento de empenhos, liquidações e pagamentos em tempo real. | [https://cmcb-labs.github.io/despesas/movimentacoes.html](https://cmcb-labs.github.io/despesas/movimentacoes.html) |
+| **Card 2: Despesas por Natureza** | Demonstrativo consolidado por classificação econômica do orçamento (Pessoal, Custeio, Investimentos). | [https://cmcb-labs.github.io/despesas/natureza.html](https://cmcb-labs.github.io/despesas/natureza.html) |
+| **Hub Central** | Acesso conjunto com ambos os cards para navegação unificada. | [https://cmcb-labs.github.io/despesas/](https://cmcb-labs.github.io/despesas/) |
+
+---
+
+## 💻 Como Linkar no Portal da Câmara (Plone)
+
+Nos cards da página `/transparencia/despesas` no Plone, substitua os links dos botões pelas URLs dedicadas acima:
+
+1. **No Botão "Consultar Movimentações ›":**
+   * **Link:** `https://cmcb-labs.github.io/despesas/movimentacoes.html`
+   * *(Opcional: abrir em nova aba com `target="_blank"`)*
+
+2. **No Botão "Acessar por Natureza ›":**
+   * **Link:** `https://cmcb-labs.github.io/despesas/natureza.html`
+   * *(Opcional: abrir em nova aba com `target="_blank"`)*
+
+---
+
+## ✨ Recursos de Acessibilidade e Auditoria ATRICON
+
+- **Zero Scrollbar Horizontal:** Layout 100% responsivo com alternância automática para cards no mobile.
+- **Tratamento de Dados Zerados:** Quando um exercício não tem despesas registradas, exibe declaração formal com carimbo de sincronização e data/hora.
+- **Exportação em Formatos Abertos:** Botões para download imediato em **CSV**, **JSON** e **Impressão**.
