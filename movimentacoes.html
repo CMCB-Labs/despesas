@@ -193,31 +193,55 @@
       box-shadow: var(--shadow-sm);
       margin-bottom: 16px;
       width: 100%;
-      overflow: hidden;
+      overflow-x: auto;
+      overflow-y: hidden;
+      -webkit-overflow-scrolling: touch;
     }
     table.cb-table {
       width: 100%;
+      min-width: 820px;
       border-collapse: collapse;
-      font-size: 0.85rem;
+      font-size: 0.83rem;
     }
     table.cb-table th {
       background: #f8fafc;
       color: var(--text-main);
       font-weight: 600;
-      padding: 10px 14px;
+      padding: 9px 10px;
       border-bottom: 2px solid var(--border);
       text-align: left;
+      font-size: 0.81rem;
+      white-space: nowrap;
     }
     table.cb-table td {
-      padding: 11px 14px;
+      padding: 9px 10px;
       border-bottom: 1px solid var(--border);
       vertical-align: middle;
+      font-size: 0.82rem;
+    }
+    table.cb-table th:first-child,
+    table.cb-table td:first-child {
+      padding-left: 12px;
+    }
+    table.cb-table th:last-child,
+    table.cb-table td:last-child {
+      padding-right: 14px;
+    }
+    table.cb-table th.text-right,
+    table.cb-table td.text-right {
+      text-align: right !important;
+      white-space: nowrap !important;
+    }
+    table.cb-table th.text-center,
+    table.cb-table td.text-center {
+      text-align: center !important;
     }
     table.cb-table tr:hover td {
       background-color: #f8fafc;
     }
-    .text-right { text-align: right; }
-    .font-mono { font-family: monospace; font-size: 0.9rem; font-weight: 600; }
+    .text-right { text-align: right !important; white-space: nowrap !important; }
+    .text-center { text-align: center !important; }
+    .font-mono { font-family: monospace; font-size: 0.86rem; font-weight: 600; }
 
     /* Badges de Fases da Despesa */
     .badge-fase {
@@ -439,13 +463,13 @@
       <table class="cb-table">
         <thead>
           <tr>
-            <th>Elemento</th>
-            <th>Ação / Projeto Orçamentário</th>
-            <th>Fase Predominante</th>
-            <th class="text-right">Dotação Inicial</th>
-            <th class="text-right">Empenhado</th>
-            <th class="text-right">Liquidado</th>
-            <th class="text-right">Pago</th>
+            <th style="width: 12%;">Elemento</th>
+            <th style="width: 32%;">Ação / Projeto Orçamentário</th>
+            <th class="text-center" style="width: 12%;">Fase Predominante</th>
+            <th class="text-right" style="width: 11%;">Dotação Fixada</th>
+            <th class="text-right" style="width: 11%;">Empenhado</th>
+            <th class="text-right" style="width: 11%;">Liquidado</th>
+            <th class="text-right" style="width: 11%;">Pago</th>
           </tr>
         </thead>
         <tbody id="tbodyDados"></tbody>
@@ -670,7 +694,7 @@
           <div style="font-size:0.83rem;">${item.NM_PROJETO || item.DS_PROGRAMA || 'Atividades do Legislativo'}</div>
           <div style="font-size:0.75rem;color:var(--text-muted);">${item.NM_RECURSO || 'Recursos do Tesouro'}</div>
         </td>
-        <td>${faseBadge}</td>
+        <td class="text-center">${faseBadge}</td>
         <td class="text-right">${formatarMoeda(dot)}</td>
         <td class="text-right font-mono" style="color:var(--accent);">${formatarMoeda(emp)}</td>
         <td class="text-right font-mono" style="color:var(--info);">${formatarMoeda(liq)}</td>
