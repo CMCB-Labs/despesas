@@ -185,7 +185,7 @@
     .cb-sum-val.gold { color: var(--accent); }
     .cb-sum-val.blue { color: var(--info); }
 
-    /* Tabela Desktop */
+    /* Tabela Desktop: exibida por padrão em computadores */
     .cb-table-container {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -196,6 +196,7 @@
       overflow-x: auto;
       overflow-y: hidden;
       -webkit-overflow-scrolling: touch;
+      display: block !important;
     }
     table.cb-table {
       width: 100%;
@@ -257,9 +258,9 @@
     .badge-liquidado { background: #e0f2fe; color: #0369a1; }
     .badge-empenhado { background: #fef3c7; color: #b45309; }
 
-    /* Cards Mobile */
+    /* Cards Mobile: estritamente ocultos no computador */
     .cb-cards-mobile {
-      display: none;
+      display: none !important;
       flex-direction: column;
       gap: 10px;
       margin-bottom: 16px;
@@ -375,8 +376,8 @@
     }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-    /* Ajustes Mobile */
-    @media (max-width: 768px) {
+    /* Ajustes Mobile e Tablets (<= 920px): Oculta tabela e exibe cards */
+    @media (max-width: 920px) {
       .cb-table-container { display: none !important; }
       .cb-cards-mobile { display: flex !important; }
       .cb-toolbar { flex-direction: column; align-items: stretch; }
@@ -458,26 +459,29 @@
       </div>
     </div>
 
-    <!-- Tabela Desktop -->
-    <div class="cb-table-container" id="boxTabela">
-      <table class="cb-table">
-        <thead>
-          <tr>
-            <th style="width: 12%;">Elemento</th>
-            <th style="width: 32%;">Ação / Projeto Orçamentário</th>
-            <th class="text-center" style="width: 12%;">Fase Predominante</th>
-            <th class="text-right" style="width: 11%;">Dotação Fixada</th>
-            <th class="text-right" style="width: 11%;">Empenhado</th>
-            <th class="text-right" style="width: 11%;">Liquidado</th>
-            <th class="text-right" style="width: 11%;">Pago</th>
-          </tr>
-        </thead>
-        <tbody id="tbodyDados"></tbody>
-      </table>
-    </div>
+    <!-- Contêiner de Dados (Tabela no Desktop / Cards no Mobile) -->
+    <div id="boxResultados">
+      <!-- Tabela Desktop -->
+      <div class="cb-table-container" id="boxTabela">
+        <table class="cb-table">
+          <thead>
+            <tr>
+              <th style="width: 12%;">Elemento</th>
+              <th style="width: 32%;">Ação / Projeto Orçamentário</th>
+              <th class="text-center" style="width: 12%;">Fase Predominante</th>
+              <th class="text-right" style="width: 11%;">Dotação Fixada</th>
+              <th class="text-right" style="width: 11%;">Empenhado</th>
+              <th class="text-right" style="width: 11%;">Liquidado</th>
+              <th class="text-right" style="width: 11%;">Pago</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyDados"></tbody>
+        </table>
+      </div>
 
-    <!-- Cards Mobile -->
-    <div class="cb-cards-mobile" id="boxCardsMobile"></div>
+      <!-- Cards Mobile -->
+      <div class="cb-cards-mobile" id="boxCardsMobile"></div>
+    </div>
 
     <!-- Alerta ATRICON: Dados Zerados -->
     <div id="boxDadoZerado" class="cb-empty-state" style="display: none;">
@@ -631,7 +635,7 @@
   function renderizarVisualizacoes(lista) {
     const tbody = document.getElementById('tbodyDados');
     const boxCardsMobile = document.getElementById('boxCardsMobile');
-    const boxTabela = document.getElementById('boxTabela');
+    const boxResultados = document.getElementById('boxResultados');
     const boxZerado = document.getElementById('boxDadoZerado');
     const ano = document.getElementById('selAno').value;
     const carimbo = new Date().toLocaleString('pt-BR');
@@ -643,8 +647,7 @@
     boxCardsMobile.innerHTML = '';
 
     if (!lista || lista.length === 0) {
-      boxTabela.style.display = 'none';
-      boxCardsMobile.style.display = 'none';
+      boxResultados.style.display = 'none';
       boxZerado.style.display = 'block';
       document.getElementById('tituloDadoZerado').innerText = `Sem movimentações registradas no exercício ${ano}`;
       document.getElementById('descDadoZerado').innerText = `Não foram registradas movimentações de empenho, liquidação ou pagamento para a Câmara Municipal de Coronel Barros em ${ano}.`;
@@ -657,8 +660,7 @@
       return;
     }
 
-    boxTabela.style.display = 'block';
-    boxCardsMobile.style.display = 'flex';
+    boxResultados.style.display = 'block';
     boxZerado.style.display = 'none';
 
     let totDot = 0, totEmp = 0, totLiq = 0, totPag = 0;
