@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Execução Orçamentária e Despesas - Câmara Municipal de Coronel Barros / RS</title>
+  <meta name="description" content="Painel oficial de consulta e transparência da Execução Orçamentária e Despesas da Câmara Municipal de Coronel Barros/RS. Dados abertos sincronizados via TCE-RS.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏛️</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --primary: #006838;
+      --primary-dark: #004d2a;
+      --primary-light: #e8f5e9;
+      --accent: #f39200;
+      --accent-light: #fff8e1;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --border: #e2e8f0;
+      --border-focus: #006838;
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 14px;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.04);
+      --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.06);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: 'Montserrat', system-ui, -apple-system, sans-serif;
+      background-color: var(--bg);
+      color: var(--text-main);
+      line-height: 1.5;
+      padding: 20px;
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Modo Embutido / Embed Iframe */
+    body.is-embedded {
+      background-color: transparent !important;
+      padding: 0 !important;
+      min-height: auto !important;
+    }
+    body.is-embedded .cb-container {
+      max-width: 100% !important;
+      padding: 0 !important;
+    }
+    body.hide-header .main-header {
+      display: none !important;
+    }
+
+    .cb-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    /* Cabeçalho */
+    .main-header {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 6px solid var(--primary);
+      border-radius: var(--radius-md);
+      padding: 20px 24px;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow-sm);
+    }
+    .header-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--primary-light);
+      color: var(--primary);
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 10px;
+    }
+    .main-header h1 {
+      font-size: 1.45rem;
+      color: var(--primary-dark);
+      margin-bottom: 6px;
+      font-weight: 700;
+    }
+    .main-header p {
+      font-size: 0.92rem;
+      color: var(--text-muted);
+    }
+
+    /* Abas de Navegação */
+    .cb-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 18px;
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 2px;
+    }
+    .cb-tab {
+      padding: 10px 18px;
+      border: none;
+      background: none;
+      font-family: inherit;
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      position: relative;
+      border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .cb-tab:hover {
+      color: var(--primary);
+      background-color: var(--primary-light);
+    }
+    .cb-tab.active {
+      color: var(--primary);
+    }
+    .cb-tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--primary);
+      border-radius: 3px;
+    }
+
+    /* Barra de Filtros */
+    .cb-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 14px 18px;
+      border-radius: var(--radius-md);
+      margin-bottom: 20px;
+      box-shadow: var(--shadow-sm);
+    }
+    .cb-filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+    }
+    .cb-label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+    .cb-select, .cb-input {
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-family: inherit;
+      font-size: 0.88rem;
+      background-color: var(--surface);
+      color: var(--text-main);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .cb-select:focus, .cb-input:focus {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 2px rgba(0, 104, 56, 0.15);
+    }
+    .cb-btn-group { display: flex; gap: 8px; flex-wrap: wrap; }
+    .cb-btn {
+      padding: 8px 14px;
+      border-radius: var(--radius-sm);
+      font-family: inherit;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text-main);
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .cb-btn:hover {
+      background: var(--primary-light);
+      border-color: var(--primary);
+      color: var(--primary-dark);
+    }
+
+    /* Cards de Resumo */
+    .cb-summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+    .cb-sum-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 18px;
+      box-shadow: var(--shadow-sm);
+    }
+    .cb-sum-title {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      font-weight: 600;
+      color: var(--text-muted);
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+    .cb-sum-val {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+    .cb-sum-val.green { color: var(--primary); }
+    .cb-sum-val.gold { color: var(--accent); }
+
+    /* Tabela */
+    .cb-table-wrapper {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      overflow-x: auto;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 20px;
+    }
+    table.cb-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.86rem;
+    }
+    table.cb-table th {
+      background: #f1f5f9;
+      color: var(--text-main);
+      font-weight: 600;
+      padding: 12px 14px;
+      border-bottom: 2px solid var(--border);
+      white-space: nowrap;
+    }
+    table.cb-table td {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    table.cb-table tr:hover td {
+      background-color: #f8fafc;
+    }
+    .text-right { text-align: right; }
+    .font-mono { font-family: monospace; font-size: 0.92rem; font-weight: 600; color: var(--primary-dark); }
+    .badge-cat {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 12px;
+      background: #e2e8f0;
+      color: #334155;
+      margin-top: 4px;
+    }
+
+    /* Estado Vazio (Dados Zerados - Requisito ATRICON) */
+    .cb-empty-state {
+      background: var(--surface);
+      border: 2px dashed #cbd5e1;
+      border-radius: var(--radius-md);
+      padding: 48px 20px;
+      text-align: center;
+      margin: 20px 0;
+    }
+    .cb-empty-icon { font-size: 2.4rem; margin-bottom: 12px; }
+    .cb-empty-title {
+      font-size: 1.12rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 6px;
+    }
+    .cb-empty-desc {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      max-width: 600px;
+      margin: 0 auto 16px;
+      line-height: 1.6;
+    }
+    .cb-badge-update {
+      display: inline-block;
+      background: var(--primary-light);
+      color: var(--primary);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    /* Rodapé Informativo / Auditoria */
+    .cb-footer-audit {
+      margin-top: auto;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      padding: 8px 4px;
+    }
+    .cb-footer-audit a {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .cb-footer-audit a:hover {
+      text-decoration: underline;
+    }
+
+    /* Loading Spinner */
+    .cb-spinner {
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid var(--primary);
+      border-radius: 50%;
+      width: 26px;
+      height: 26px;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 12px;
+    }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+<div class="cb-container">
+
+  <!-- Cabeçalho Principal -->
+  <header class="main-header">
+    <div class="header-badge">🏛️ Transparência Pública Oficial</div>
+    <h1 id="viewTitle">Despesas por Natureza da Despesa</h1>
+    <p id="viewDesc">Demonstrativo consolidado dos gastos da Câmara Municipal de Coronel Barros (Órgão TCE-RS: 75101) classificados por elemento econômico, em conformidade com o Art. 48-A da LRF e Resolução ATRICON.</p>
+  </header>
+
+  <!-- Abas de Navegação -->
+  <nav class="cb-tabs" id="navTabs">
+    <button class="cb-tab active" id="tabNatureza" onclick="trocarAba('natureza')">
+      📊 Por Natureza da Despesa
+    </button>
+    <button class="cb-tab" id="tabMovimentacoes" onclick="trocarAba('movimentacoes')">
+      💳 Movimentações e Empenhos
+    </button>
+  </nav>
+
+  <!-- Barra de Ferramentas / Filtros -->
+  <div class="cb-toolbar">
+    <div class="cb-filters">
+      <label class="cb-label" for="selAno">Exercício:</label>
+      <select id="selAno" class="cb-select" onchange="carregarDados()">
+        <option value="2026">2026</option>
+        <option value="2025">2025</option>
+        <option value="2024" selected>2024</option>
+        <option value="2023">2023</option>
+        <option value="2022">2022</option>
+        <option value="2021">2021</option>
+      </select>
+
+      <label class="cb-label" for="selCategoria" id="lblCategoria">Categoria:</label>
+      <select id="selCategoria" class="cb-select" onchange="filtrarDados()">
+        <option value="">Todas as Categorias</option>
+        <option value="3.1">3.1 - Pessoal e Encargos</option>
+        <option value="3.3">3.3 - Outras Despesas Correntes (Custeio)</option>
+        <option value="4.4">4.4 - Investimentos e Obras</option>
+      </select>
+
+      <input type="text" id="txtBusca" class="cb-input" placeholder="Buscar por elemento, projeto..." onkeyup="filtrarDados()" style="min-width: 220px;">
+    </div>
+
+    <div class="cb-btn-group">
+      <button class="cb-btn" onclick="exportarCSV()">⬇️ CSV</button>
+      <button class="cb-btn" onclick="exportarJSON()">⬇️ JSON</button>
+      <button class="cb-btn" onclick="window.print()">🖨️ Imprimir</button>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div id="loading" style="text-align: center; padding: 50px 20px; color: var(--text-muted); font-weight: 600;">
+    <div class="cb-spinner"></div>
+    Sincronizando dados com o Tribunal de Contas do Estado (TCE-RS)...
+  </div>
+
+  <!-- Conteúdo Principal -->
+  <main id="content" style="display: none;">
+    <!-- Cards de Totais -->
+    <div class="cb-summary-grid">
+      <div class="cb-sum-card">
+        <div class="cb-sum-title">Dotação Fixada (LOA)</div>
+        <div id="totalDotacao" class="cb-sum-val">R$ 0,00</div>
+      </div>
+      <div class="cb-sum-card">
+        <div class="cb-sum-title">Despesas Empenhadas</div>
+        <div id="totalEmpenhado" class="cb-sum-val gold">R$ 0,00</div>
+      </div>
+      <div class="cb-sum-card">
+        <div class="cb-sum-title">Despesas Liquidadas</div>
+        <div id="totalLiquidado" class="cb-sum-val">R$ 0,00</div>
+      </div>
+      <div class="cb-sum-card">
+        <div class="cb-sum-title">Despesas Pagas</div>
+        <div id="totalPago" class="cb-sum-val green">R$ 0,00</div>
+      </div>
+    </div>
+
+    <!-- Tabela de Dados -->
+    <div class="cb-table-wrapper" id="boxTabela">
+      <table class="cb-table" id="tabelaDados">
+        <thead id="theadDados">
+          <tr>
+            <th>Elemento</th>
+            <th>Especificação da Natureza da Despesa</th>
+            <th>Ação / Projeto Orçamentário</th>
+            <th class="text-right">Dotação Inicial</th>
+            <th class="text-right">Empenhado</th>
+            <th class="text-right">Liquidado</th>
+            <th class="text-right">Pago</th>
+            <th class="text-right">Saldo</th>
+          </tr>
+        </thead>
+        <tbody id="tbodyDados">
+          <!-- Linhas renderizadas via JavaScript -->
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Alerta ATRICON: Dados Zerados (Informação Negativa Oficial) -->
+    <div id="boxDadoZerado" class="cb-empty-state" style="display: none;">
+      <div class="cb-empty-icon">📅</div>
+      <div class="cb-empty-title" id="tituloDadoZerado">Nenhuma movimentação registrada no exercício selecionado</div>
+      <p class="cb-empty-desc" id="descDadoZerado">
+        A Câmara Municipal de Coronel Barros não possui registros de execução orçamentária ou liquidação de despesa contabilizados até o momento para o exercício consultado.
+      </p>
+      <div class="cb-badge-update" id="lblUltimaAtualizacaoZerada">
+        Base oficial do TCE-RS sincronizada em: --/--/----
+      </div>
+    </div>
+
+    <!-- Rodapé de Auditoria e Transparência -->
+    <footer class="cb-footer-audit">
+      <span>
+        Fonte oficial: <strong>Tribunal de Contas do Estado do RS (TCE-RS)</strong> | Órgão: <strong>75101 - CM DE CORONEL BARROS</strong>
+      </span>
+      <span id="lblCarimboAtualizacao">Sincronizado via Cloudflare Edge</span>
+    </footer>
+  </main>
+
+</div>
+
+<script>
+  // URL DO CLOUDFLARE WORKER CONFIGURADO
+  const WORKER_BASE_URL = 'https://super-tree-8152.tiagotreter-e41.workers.dev';
+
+  // Dicionário Oficial de Nomes de Elementos de Despesa da Contabilidade Pública
+  const NOMES_ELEMENTOS = {
+    '3.1.90.04': 'Contratação por Tempo Determinado',
+    '3.1.90.07': 'Contribuição a Entidades Fechadas de Previdência',
+    '3.1.90.11': 'Vencimentos e Vantagens Fixas - Pessoal Civil',
+    '3.1.90.13': 'Obrigações Patronais (INSS / FGTS)',
+    '3.1.90.92': 'Despesas de Exercícios Anteriores',
+    '3.1.90.94': 'Indenizações e Restituições Trabalhistas',
+    '3.1.91.13': 'Obrigações Patronais - Operações Intraorçamentárias',
+    '3.3.90.08': 'Outros Benefícios Assistenciais',
+    '3.3.90.14': 'Diárias - Pessoal Civil',
+    '3.3.90.30': 'Material de Consumo',
+    '3.3.90.32': 'Material de Distribuição Gratuita',
+    '3.3.90.33': 'Passagens e Despesas com Locomoção',
+    '3.3.90.35': 'Serviços de Consultoria',
+    '3.3.90.39': 'Outros Serviços de Terceiros - Pessoa Jurídica',
+    '3.3.90.40': 'Serviços de Tecnologia da Informação e Comunicação (TIC)',
+    '3.3.90.46': 'Auxílio-Alimentação',
+    '3.3.90.47': 'Obrigações Tributárias e Contributivas',
+    '3.3.90.93': 'Indenizações e Restituições',
+    '3.3.91.08': 'Outros Benefícios Assistenciais do Servidor',
+    '4.4.90.30': 'Material de Consumo (Investimentos)',
+    '4.4.90.39': 'Outros Serviços de Terceiros - PJ (Investimentos)',
+    '4.4.90.51': 'Obras e Instalações',
+    '4.4.90.52': 'Equipamentos e Material Permanente',
+    '4.4.90.61': 'Aquisição de Imóveis'
+  };
+
+  let dadosBrutos = [];
+  let abaAtiva = 'natureza';
+
+  // Verifica parâmetros de URL (embed=1, hide_header=1, view=natureza, ano=2024)
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('embed') === '1') {
+    document.body.classList.add('is-embedded');
+  }
+  if (urlParams.get('hide_header') === '1') {
+    document.body.classList.add('hide-header');
+  }
+  if (urlParams.get('view')) {
+    abaAtiva = urlParams.get('view');
+  }
+  if (urlParams.get('ano')) {
+    const selAno = document.getElementById('selAno');
+    if (selAno.querySelector(`option[value="${urlParams.get('ano')}"]`)) {
+      selAno.value = urlParams.get('ano');
+    }
+  }
+
+  function formatarMoeda(val) {
+    return Number(val || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  }
+
+  function trocarAba(novaAba) {
+    abaAtiva = novaAba;
+    document.getElementById('tabNatureza').classList.toggle('active', abaAtiva === 'natureza');
+    document.getElementById('tabMovimentacoes').classList.toggle('active', abaAtiva === 'movimentacoes');
+
+    if (abaAtiva === 'natureza') {
+      document.getElementById('viewTitle').innerText = 'Despesas por Natureza da Despesa';
+      document.getElementById('viewDesc').innerText = 'Demonstrativo consolidado dos gastos da Câmara Municipal de Coronel Barros segundo a classificação econômica do orçamento.';
+      document.getElementById('lblCategoria').style.display = 'inline-block';
+      document.getElementById('selCategoria').style.display = 'inline-block';
+    } else {
+      document.getElementById('viewTitle').innerText = 'Movimentações da Execução Orçamentária';
+      document.getElementById('viewDesc').innerText = 'Acompanhamento detalhado das fases de empenho, liquidação e pagamento das contas do Poder Legislativo.';
+      document.getElementById('lblCategoria').style.display = 'none';
+      document.getElementById('selCategoria').style.display = 'none';
+    }
+
+    filtrarDados();
+  }
+
+  async function carregarDados() {
+    const ano = document.getElementById('selAno').value;
+    const loading = document.getElementById('loading');
+    const content = document.getElementById('content');
+
+    loading.style.display = 'block';
+    content.style.display = 'none';
+
+    try {
+      // Chamada GET direta ao Cloudflare Worker
+      const response = await fetch(`${WORKER_BASE_URL}/despesas?ano=${ano}`);
+      const json = await response.json();
+
+      dadosBrutos = json.balancete_despesa || [];
+      filtrarDados();
+    } catch (err) {
+      console.error('Erro ao conectar com o Worker:', err);
+      dadosBrutos = [];
+      filtrarDados();
+    } finally {
+      loading.style.display = 'none';
+      content.style.display = 'block';
+    }
+  }
+
+  function filtrarDados() {
+    const cat = document.getElementById('selCategoria').value;
+    const termo = document.getElementById('txtBusca').value.toLowerCase().trim();
+
+    const filtrados = dadosBrutos.filter(item => {
+      const el = (item.CD_ELEMENTO || '');
+      const proj = (item.NM_PROJETO || item.DS_PROGRAMA || '').toLowerCase();
+      const nomeEl = (NOMES_ELEMENTOS[el] || '').toLowerCase();
+
+      // Filtro de categoria
+      if (abaAtiva === 'natureza' && cat && !el.startsWith(cat)) {
+        return false;
+      }
+
+      // Filtro de busca textual
+      if (termo) {
+        const match = el.toLowerCase().includes(termo) || proj.includes(termo) || nomeEl.includes(termo);
+        if (!match) return false;
+      }
+
+      return true;
+    });
+
+    renderizarTabela(filtrados);
+  }
+
+  function renderizarTabela(lista) {
+    const tbody = document.getElementById('tbodyDados');
+    const boxTabela = document.getElementById('boxTabela');
+    const boxZerado = document.getElementById('boxDadoZerado');
+    const ano = document.getElementById('selAno').value;
+    const carimbo = new Date().toLocaleString('pt-BR');
+
+    document.getElementById('lblCarimboAtualizacao').innerText = `Base oficial sincronizada em: ${carimbo}`;
+    document.getElementById('lblUltimaAtualizacaoZerada').innerText = `Base oficial sincronizada em: ${carimbo}`;
+
+    tbody.innerHTML = '';
+
+    // Tratamento de DADO ZERADO (Critério ATRICON)
+    if (!lista || lista.length === 0) {
+      boxTabela.style.display = 'none';
+      boxZerado.style.display = 'block';
+      document.getElementById('tituloDadoZerado').innerText = `Sem movimentação registrada no exercício ${ano}`;
+      document.getElementById('descDadoZerado').innerText = `Não foram encontradas despesas orçamentárias contabilizadas para a Câmara Municipal de Coronel Barros em ${ano}. Os dados são sincronizados em tempo real com o TCE-RS.`;
+      
+      document.getElementById('totalDotacao').innerText = formatarMoeda(0);
+      document.getElementById('totalEmpenhado').innerText = formatarMoeda(0);
+      document.getElementById('totalLiquidado').innerText = formatarMoeda(0);
+      document.getElementById('totalPago').innerText = formatarMoeda(0);
+      return;
+    }
+
+    boxTabela.style.display = 'block';
+    boxZerado.style.display = 'none';
+
+    let totDot = 0, totEmp = 0, totLiq = 0, totPag = 0;
+
+    lista.forEach(item => {
+      const dot = Number(item.VL_DOTACAO_INICIAL || 0);
+      const emp = Number(item.VL_EMPENHADO || 0);
+      const liq = Number(item.VL_LIQUIDADO || 0);
+      const pag = Number(item.VL_PAGO || 0);
+      const saldo = dot - emp;
+
+      totDot += dot;
+      totEmp += emp;
+      totLiq += liq;
+      totPag += pag;
+
+      const el = item.CD_ELEMENTO || '-';
+      const nomeEl = NOMES_ELEMENTOS[el] || 'Despesa Orçamentária Geral';
+
+      let catBadge = '';
+      if (el.startsWith('3.1')) catBadge = '<span class="badge-cat" style="background:#e0f2fe;color:#0369a1;">Pessoal</span>';
+      else if (el.startsWith('3.3')) catBadge = '<span class="badge-cat" style="background:#fef3c7;color:#92400e;">Custeio/Consumo</span>';
+      else if (el.startsWith('4.4')) catBadge = '<span class="badge-cat" style="background:#dcfce7;color:#15803d;">Investimentos</span>';
+
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>
+          <span class="font-mono">${el}</span>
+          ${catBadge}
+        </td>
+        <td>
+          <strong>${nomeEl}</strong>
+          <div style="font-size:0.78rem;color:var(--text-muted);">${item.NM_RECURSO || 'Recursos Livres'}</div>
+        </td>
+        <td>
+          <div style="font-size:0.86rem;">${item.NM_PROJETO || item.DS_PROGRAMA || 'Atividades do Legislativo'}</div>
+        </td>
+        <td class="text-right">${formatarMoeda(dot)}</td>
+        <td class="text-right font-mono" style="color:var(--accent);">${formatarMoeda(emp)}</td>
+        <td class="text-right">${formatarMoeda(liq)}</td>
+        <td class="text-right font-mono" style="color:var(--primary);">${formatarMoeda(pag)}</td>
+        <td class="text-right font-mono" style="color:${saldo < 0 ? '#dc2626' : 'var(--text-main)'};">${formatarMoeda(saldo)}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    document.getElementById('totalDotacao').innerText = formatarMoeda(totDot);
+    document.getElementById('totalEmpenhado').innerText = formatarMoeda(totEmp);
+    document.getElementById('totalLiquidado').innerText = formatarMoeda(totLiq);
+    document.getElementById('totalPago').innerText = formatarMoeda(totPag);
+  }
+
+  function exportarCSV() {
+    if (!dadosBrutos.length) return alert('Nenhum dado disponível para exportação.');
+    const ano = document.getElementById('selAno').value;
+    let csv = 'Elemento;Especificacao;Projeto_Atividade;Dotacao_Inicial;Empenhado;Liquidado;Pago;Saldo\n';
+    
+    dadosBrutos.forEach(d => {
+      const el = d.CD_ELEMENTO || '';
+      const nome = NOMES_ELEMENTOS[el] || '';
+      const proj = d.NM_PROJETO || d.DS_PROGRAMA || '';
+      const dot = d.VL_DOTACAO_INICIAL || 0;
+      const emp = d.VL_EMPENHADO || 0;
+      const liq = d.VL_LIQUIDADO || 0;
+      const pag = d.VL_PAGO || 0;
+      const saldo = dot - emp;
+      csv += `"${el}";"${nome}";"${proj}";"${dot}";"${emp}";"${liq}";"${pag}";"${saldo}"\n`;
+    });
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `despesas_camara_coronel_barros_${ano}.csv`;
+    link.click();
+  }
+
+  function exportarJSON() {
+    if (!dadosBrutos.length) return alert('Nenhum dado disponível para exportação.');
+    const ano = document.getElementById('selAno').value;
+    const blob = new Blob([JSON.stringify(dadosBrutos, null, 2)], { type: 'application/json' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `despesas_camara_coronel_barros_${ano}.json`;
+    link.click();
+  }
+
+  // Inicializa a aplicação
+  window.onload = () => {
+    trocarAba(abaAtiva);
+    carregarDados();
+  };
+</script>
+
+</body>
+</html>
