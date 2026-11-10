@@ -512,19 +512,20 @@
   let dadosBrutos = [];
   let lastSentHeight = 0;
   let resizeTimer = null;
+  let lastWindowWidth = window.innerWidth;
 
-  // COMUNICAÇÃO DE ALTURA DINÂMICA COM O PLONE (EVITA CORTAR O IFRAME)
+  // COMUNICAÇÃO DE ALTURA DINÂMICA COM O PLONE (EVITA CORTAR O IFRAME E EVITA LOOP)
   function notifyHeight() {
     if (window.self === window.top) return;
 
     if (resizeTimer) clearTimeout(resizeTimer);
     resizeTimer = setTimeout(() => {
-      const wrapper = document.getElementById('pageWrapper') || document.body;
+      const wrapper = document.getElementById('pageWrapper');
+      if (!wrapper) return;
       const rect = wrapper.getBoundingClientRect();
-      const scrollH = document.documentElement.scrollHeight || document.body.scrollHeight;
-      const exactHeight = Math.ceil(Math.max(rect.height, scrollH)) + 24;
+      const exactHeight = Math.ceil(rect.height);
 
-      if (Math.abs(lastSentHeight - exactHeight) >= 2) {
+      if (exactHeight > 50 && Math.abs(lastSentHeight - exactHeight) >= 4) {
         lastSentHeight = exactHeight;
         window.parent.postMessage({
           type: 'sapl-resize',
@@ -535,15 +536,17 @@
           newHeight: exactHeight
         }, '*');
       }
-    }, 60);
+    }, 40);
   }
 
-  // Monitora alterações de tamanho da janela ou do DOM
-  if (window.ResizeObserver) {
-    const ro = new ResizeObserver(() => notifyHeight());
-    ro.observe(document.body);
-  }
-  window.addEventListener('resize', notifyHeight);
+  // Recalcula apenas se a LARGURA mudar (ex: rotação de celular ou redimensionamento de tela)
+  window.addEventListener('resize', () => {
+    const currentWidth = window.innerWidth;
+    if (currentWidth !== lastWindowWidth) {
+      lastWindowWidth = currentWidth;
+      notifyHeight();
+    }
+  });
 
   function formatarMoeda(val) {
     return Number(val || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -556,7 +559,6 @@
 
     loading.style.display = 'block';
     content.style.display = 'none';
-    notifyHeight();
 
     try {
       const response = await fetch(`${WORKER_BASE_URL}/despesas?ano=${ano}`);
@@ -571,8 +573,7 @@
       loading.style.display = 'none';
       content.style.display = 'block';
       notifyHeight();
-      setTimeout(notifyHeight, 200);
-      setTimeout(notifyHeight, 600);
+      setTimeout(notifyHeight, 150);
     }
   }
 
@@ -716,8 +717,7 @@
     document.getElementById('totalPago').innerText = formatarMoeda(totPag);
 
     notifyHeight();
-    setTimeout(notifyHeight, 200);
-    setTimeout(notifyHeight, 500);
+    setTimeout(notifyHeight, 150);
   }
 
   function exportarCSV() {
